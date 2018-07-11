@@ -1,0 +1,39 @@
+#! /bin/sh
+# /etc/init.d/virtualshield-svc
+
+### BEGIN INIT INFO
+# Provides:          virtualshield-svc
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Script to start the VirtualShield service (daemon)
+# Description:       A simple script which will start and stop the VirtualShield service (daemon) on boot/shutdown.
+### END INIT INFO
+
+# If you want a command to always run, put it here
+LOCK_FILE="/tmp/VirtualShieldSvc.lock"
+
+# Carry out specific functions when asked to by the system
+case "$1" in
+  start)
+    echo "Starting VirtualShield service (daemon)..."
+    mkdir -p /tmp/VirtualShield && ln -sf /usr/share/virtualshield/virtualshield.deb /tmp/VirtualShield/ && mono-service -l:${LOCK_FILE} /usr/share/virtualshield/VirtualShieldSvc.exe
+    ;;
+  stop)
+    echo "Stopping VirtualShield service (daemon)..."
+    if [ -e ${LOCK_FILE} ]
+    then
+        _pid=$(cat ${LOCK_FILE})
+        kill $_pid
+    else
+        echo "VirtualShield service is not running"
+    fi
+    ;;
+  *)
+    echo "Usage: /etc/init.d/virtualshield-svc {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0
